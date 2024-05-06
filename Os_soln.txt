@@ -1,0 +1,265 @@
+Q1: C code to create a directory on desktop, create a file inside the directory and list the contents of the directory.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+
+int main() {
+    system("mkdir C:\\Users\\YourUsername\\Desktop\\NewDirectory");
+    system("echo. > C:\\Users\\YourUsername\\Desktop\\NewDirectory\\newfile.txt");
+
+    DIR *d;
+    struct dirent *dir;
+    d = opendir("C:\\Users\\YourUsername\\Desktop\\NewDirectory");
+
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            printf("%s\n", dir->d_name);
+        }
+        closedir(d);
+    }
+
+    return 0;
+}
+Q2: Shell script to display the list of odd numbers ranging from 21 to 121.
+
+#!/bin/bash
+for i in {21..121}
+do
+   if [ $((i%2)) -ne 0 ]
+   then
+       echo $i
+   fi
+done
+Q3: C program using system call to read from console until user enters '@' and print the same on a file.
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    FILE *file = fopen("output.txt", "w");
+    char c;
+
+    while ((c = getchar()) != '@') {
+        fputc(c, file);
+    }
+
+    fclose(file);
+    return 0;
+}
+Q4: C program to simulate the execution of child before parent.
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int main() {
+    pid_t pid = fork();
+
+    if (pid > 0) {
+        wait(NULL);
+        printf("Parent process\n");
+    }
+    else if (pid == 0) {
+        printf("Child process\n");
+    }
+
+    return 0;
+}
+
+Q5: C program that performs statistical operations of calculating the sum of numbers maximum and minimum for a set of numbers. Create three threads where each performs their respective operations.
+
+#include <stdio.h>
+#include <pthread.h>
+#include <limits.h>
+
+#define SIZE 5
+
+int numbers[SIZE] = {1, 2, 3, 4, 5};
+
+void *calculate_sum(void *arg) {
+    int sum = 0;
+    for (int i = 0; i < SIZE; i++) {
+        sum += numbers[i];
+    }
+    printf("Sum: %d\n", sum);
+    return NULL;
+}
+
+void *calculate_max(void *arg) {
+    int max = INT_MIN;
+    for (int i = 0; i < SIZE; i++) {
+        if (numbers[i] > max) {
+            max = numbers[i];
+        }
+    }
+    printf("Max: %d\n", max);
+    return NULL;
+}
+
+void *calculate_min(void *arg) {
+    int min = INT_MAX;
+    for (int i = 0; i < SIZE; i++) {
+        if (numbers[i] < min) {
+            min = numbers[i];
+        }
+    }
+    printf("Min: %d\n", min);
+    return NULL;
+}
+
+int main() {
+    pthread_t thread1, thread2, thread3;
+
+    pthread_create(&thread1, NULL, calculate_sum, NULL);
+    pthread_create(&thread2, NULL, calculate_max, NULL);
+    pthread_create(&thread3, NULL, calculate_min, NULL);
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+    pthread_join(thread3, NULL);
+
+    return 0;
+}
+
+Q6: C program using pthread to find the length of string, where strings are passed to thread function.
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+
+void *calculate_length(void *arg) {
+    char *str = (char *)arg;
+    printf("Length: %lu\n", strlen(str));
+    return NULL;
+}
+
+int main() {
+    pthread_t thread;
+    char *str = "Hello, World!";
+
+    pthread_create(&thread, NULL, calculate_length, (void *)str);
+    pthread_join(thread, NULL);
+
+    return 0;
+}
+Q7: C program on process synchronization, where you have to provide the solution to race condition using semaphores.
+
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+sem_t sem;
+int count = 0;
+
+void *increment(void *arg) {
+    for (int i = 0; i < 100000; i++) {
+        sem_wait(&sem);
+        count++;
+        sem_post(&sem);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t thread1, thread2;
+
+    sem_init(&sem, 0, 1);
+
+    pthread_create(&thread1, NULL, increment, NULL);
+    pthread_create(&thread2, NULL, increment, NULL);
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    printf("Count: %d\n", count);
+
+    sem_destroy(&sem);
+
+    return 0;
+}
+
+Q8: C program on process synchronization where you have to provide solution to race condition using mutex_lock.
+#include <stdio.h>
+#include <pthread.h>
+
+pthread_mutex_t lock;
+int count = 0;
+
+void *increment(void *arg) {
+    for (int i = 0; i < 100000; i++) {
+        pthread_mutex_lock(&lock);
+        count++;
+        pthread_mutex_unlock(&lock);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t thread1, thread2;
+
+    pthread_mutex_init(&lock, NULL);
+
+    pthread_create(&thread1, NULL, increment, NULL);
+    pthread_create(&thread2, NULL, increment, NULL);
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    printf("Count: %d\n", count);
+
+    pthread_mutex_destroy(&lock);
+
+    return 0;
+}
+
+Q9: C program to implement Inter-process communication using shared memory.
+
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <string.h>
+
+int main() {
+    key_t key = ftok("shmfile",65);
+    int shmid = shmget(key,1024,0666|IPC_CREAT);
+    char *str = (char*) shmat(shmid,(void*)0,0);
+
+    printf("Write Data : ");
+    gets(str);
+
+    printf("Data written in memory: %s\n",str);
+    
+    shmdt(str);
+
+    return 0;
+}
+Q10: C program to implement Inter-process communication using pipes, you have to pass the message from child to parent.
+
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+
+int main() {
+    int fd[2];
+    pid_t pid;
+    char str[] = "Hello, parent!";
+    char buf[100];
+
+    pipe(fd);
+    pid = fork();
+
+    if (pid > 0) {
+        close(fd[1]);
+        read(fd[0], buf, sizeof(buf));
+        printf("Received string: %s\n", buf);
+        close(fd[0]);
+    } else {
+        close(fd[0]);
+        write(fd[1], str, strlen(str)+1);
+        close(fd[1]);
+    }
+
+    return 0;
+}
+
+
+

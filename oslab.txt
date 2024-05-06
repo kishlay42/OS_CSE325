@@ -1,0 +1,932 @@
+unit 2
+Exercise 1: Write a shell script that calculates the sum of numbers from 1 to a user-provided value using a for loop.
+
+#!/bin/bash
+
+echo "Enter a number:"
+read num
+
+sum=0
+for (( i=1; i<=$num; i++ ))
+do
+    sum=$((sum + i))
+done
+
+echo "Sum of numbers from 1 to $num is: $sum"
+-----------------------------------------------------------------------
+Exercise 2: Write a script to generate the Fibonacci series up to a specified number using a for loop.
+
+#!/bin/bash
+
+echo "Enter the size of Fibonacci series:"
+read size
+
+a=0
+b=1
+
+echo "Fibonacci series up to size $size:"
+for (( i=0; i<size; i++ ))
+do
+    echo -n "$a "
+    fn=$((a + b))
+    a=$b
+    b=$fn
+done
+echo
+---------------------------------------------------------------------------
+Exercise 3: Develop a script that checks whether a user-input number is prime or not using a loop.
+
+#!/bin/bash
+
+echo "Enter a number:"
+read num
+
+is_prime=true
+
+if ((num <= 1)); then
+    is_prime=false
+fi
+
+for (( i=2; i<=num/2; i++ ))
+do
+    if ((num % i == 0)); then
+        is_prime=false
+        break
+    fi
+done
+
+if $is_prime; then
+    echo "$num is a prime number"
+else
+    echo "$num is not a prime number"
+fi
+-----------------------------------------------------------------------------
+
+Exercise 4: Create a script that reverses a given number using a while loop.
+
+#!/bin/bash
+
+echo "Enter a number:"
+read num
+
+reverse=0
+while ((num != 0))
+do
+    digit=$((num % 10))
+    reverse=$((reverse * 10 + digit))
+    num=$((num / 10))
+done
+
+echo "Reversed number: $reverse"
+----------------------------------------------------------------------
+Exercise 5: Write a script to display all files in a directory using a for loop.
+
+#!/bin/bash
+
+echo "Files in the current directory:"
+for file in *
+do
+    if [ -f "$file" ]; then
+        echo "$file"
+    fi
+done
+-------------------------------------------------------------------------
+
+Exercise 6: Develop a script that asks the user for a username and password, allowing access only if both are correct using control structures.
+
+#!/bin/bash
+
+valid_username="user"
+valid_password="password"
+
+echo "Enter username:"
+read username
+
+echo "Enter password:"
+read -s password
+
+if [ "$username" == "$valid_username" ] && [ "$password" == "$valid_password" ]; then
+    echo "Access granted"
+else
+    echo "Access denied"
+fi
+----------------------------------------------------------------------------------
+Exercise 7: Create a menu—driven calculator script that performs basic arithmetic operations
+based on user selection using a case structure. write in c
+
+#!/bin/bash
+
+echo "Menu-Driven Calculator"
+echo "-----------------------"
+echo "1. Addition"
+echo "2. Subtraction"
+echo "3. Multiplication"
+echo "4. Division"
+echo "5. Exit"
+
+while true; do
+    read -p "Enter your choice (1-5): " choice
+
+    case $choice in
+        1)
+            read -p "Enter first number: " num1
+            read -p "Enter second number: " num2
+            result=$(echo "$num1 + $num2" | bc)
+            echo "Result: $result"
+            ;;
+        2)
+            read -p "Enter first number: " num1
+            read -p "Enter second number: " num2
+            result=$(echo "$num1 - $num2" | bc)
+            echo "Result: $result"
+            ;;
+        3)
+            read -p "Enter first number: " num1
+            read -p "Enter second number: " num2
+            result=$(echo "$num1 * $num2" | bc)
+            echo "Result: $result"
+            ;;
+        4)
+            read -p "Enter first number: " num1
+            read -p "Enter second number: " num2
+            if [ "$num2" -eq 0 ]; then
+                echo "Error! Division by zero is not allowed."
+            else
+                result=$(echo "scale=2; $num1 / $num2" | bc)
+                echo "Result: $result"
+            fi
+            ;;
+        5)
+            echo "Exiting..."
+            exit 0
+            ;;
+        *)
+            echo "Invalid choice! Please enter a number between 1 and 5."
+            ;;
+    esac
+done
+--------------------------------------------------------------------------------------
+
+unit-3
+
+Exercise 1: Write a program in C using system calls that lets users copy either the first half or the second half of a file by entering 1 or 2.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    char source_file[100], destination_file[100];
+    int source_fd, destination_fd;
+    char buffer[BUFFER_SIZE];
+    int bytes_read, bytes_written;
+    off_t file_size, half_size;
+
+    printf("Enter the source file name: ");
+    scanf("%s", source_file);
+    printf("Enter the destination file name: ");
+    scanf("%s", destination_file);
+
+    source_fd = open(source_file, O_RDONLY);
+    if (source_fd == -1) {
+        perror("Error opening source file");
+        exit(EXIT_FAILURE);
+    }
+
+    destination_fd = open(destination_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (destination_fd == -1) {
+        perror("Error opening destination file");
+        exit(EXIT_FAILURE);
+    }
+
+    file_size = lseek(source_fd, 0, SEEK_END);
+    half_size = file_size / 2;
+    lseek(source_fd, 0, SEEK_SET);
+
+    int choice;
+    printf("Enter 1 to copy the first half or 2 to copy the second half: ");
+    scanf("%d", &choice);
+
+    off_t offset = (choice == 1) ? 0 : half_size;
+
+    lseek(source_fd, offset, SEEK_SET);
+
+    while ((bytes_read = read(source_fd, buffer, BUFFER_SIZE)) > 0) {
+        bytes_written = write(destination_fd, buffer, bytes_read);
+        if (bytes_written != bytes_read) {
+            perror("Error writing to destination file");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    close(source_fd);
+    close(destination_fd);
+
+    printf("File copied successfully.\n");
+
+    return 0;
+}
+-------------------------------------------------------------------
+
+Exercise 2: Create a C program using system calls that keeps reading from the console until the user types "Save", then writes the input data to a file called 'input.txt'.
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <string.h>
+
+#define BUFFER_SIZE 1024
+
+int main() {
+    char input_file[] = "input.txt";
+    char buffer[BUFFER_SIZE];
+    int bytes_read, bytes_written;
+    int input_fd;
+
+    input_fd = open(input_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (input_fd == -1) {
+        perror("Error opening input file");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Enter data (type 'Save' to save and exit):\n");
+
+    while (1) {
+        fgets(buffer, BUFFER_SIZE, stdin);
+
+        if (strncmp(buffer, "Save", 4) == 0) {
+            break;
+        }
+
+        bytes_written = write(input_fd, buffer, strlen(buffer));
+        if (bytes_written == -1) {
+            perror("Error writing to file");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    close(input_fd);
+
+    printf("Data saved to input.txt.\n");
+
+    return 0;
+}
+------------------------------------------------------------------------------------
+
+Exercise 3: Write a C program that encrypts a text file using a simple encryption technique and saves the encrypted content to a new file.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#define BUFFER_SIZE 1024
+#define SHIFT_AMOUNT 3 // Fixed number to shift characters
+
+int main() {
+    char input_file[] = "input.txt";
+    char output_file[] = "encrypted.txt";
+    char buffer[BUFFER_SIZE];
+    int bytes_read, bytes_written;
+    int input_fd, output_fd;
+
+    input_fd = open(input_file, O_RDONLY);
+    if (input_fd == -1) {
+        perror("Error opening input file");
+        exit(EXIT_FAILURE);
+    }
+
+    output_fd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (output_fd == -1) {
+        perror("Error opening output file");
+        exit(EXIT_FAILURE);
+    }
+
+    while ((bytes_read = read(input_fd, buffer, BUFFER_SIZE)) > 0) {
+        for (int i = 0; i < bytes_read; i++) {
+            // Encrypt each character by shifting ASCII value
+            if (buffer[i] >= 'a' && buffer[i] <= 'z') {
+                buffer[i] = 'a' + (buffer[i] - 'a' + SHIFT_AMOUNT) % 26;
+            } else if (buffer[i] >= 'A' && buffer[i] <= 'Z') {
+                buffer[i] = 'A' + (buffer[i] - 'A' + SHIFT_AMOUNT) % 26;
+            }
+        }
+
+        bytes_written = write(output_fd, buffer, bytes_read);
+        if (bytes_written != bytes_read) {
+            perror("Error writing to output file");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    close(input_fd);
+    close(output_fd);
+
+    printf("File encrypted successfully.\n");
+
+    return 0;
+}
+---------------------------------------------------------------------------------
+
+unit 4
+Exercise 1: Create a Directory
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    char dirname[100];
+
+    printf("Enter directory name to create: ");
+    scanf("%s", dirname);
+
+    if (mkdir(dirname, 0777) == 0) {
+        printf("Directory created successfully.\n");
+    } else {
+        printf("Error creating directory.\n");
+    }
+
+    return 0;
+}
+--------------------------------------------------------------------------------
+
+Exercise 2: List Directory Contents
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+
+int main() {
+    DIR *dir;
+    struct dirent *entry;
+
+    dir = opendir(".");
+
+    if (dir == NULL) {
+        perror("Unable to open directory");
+        return 1;
+    }
+
+    printf("Contents of current directory:\n");
+    while ((entry = readdir(dir)) != NULL) {
+        printf("%s\n", entry->d_name);
+    }
+
+    closedir(dir);
+
+    return 0;
+}
+-------------------------------------------------------------------------------
+Exercise 3: Delete a Directory
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    char dirname[100];
+
+    printf("Enter directory name to delete: ");
+    scanf("%s", dirname);
+
+    if (rmdir(dirname) == 0) {
+        printf("Directory deleted successfully.\n");
+    } else {
+        printf("Error deleting directory.\n");
+    }
+
+    return 0;
+}
+------------------------------------------------------------------------------------
+
+Exercise 4: Get Current Working Directory
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main() {
+    char cwd[1024];
+
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+        printf("Current working directory: %s\n", cwd);
+    } else {
+        perror("Error getting current working directory");
+        return 1;
+    }
+
+    return 0;
+}
+--------------------------------------------------------------------------------------
+
+unit 5
+
+Exercise 2: Generating Process Hierarchy P1 -> P2 -> P3
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    printf("Parent Process, PID: %d, Parent PID: %d\n", getpid(), getppid());
+
+    if (fork() == 0) {
+        printf("Child Process P1, PID: %d, Parent PID: %d\n", getpid(), getppid());
+
+        if (fork() == 0) {
+            printf("Child Process P2, PID: %d, Parent PID: %d\n", getpid(), getppid());
+        } else {
+            if (fork() == 0) {
+                printf("Child Process P3, PID: %d, Parent PID: %d\n", getpid(), getppid());
+            }
+        }
+    }
+
+    return 0;
+}
+exercise 1
+
+2^n-1 child processes
+
+#include <stdio.h>
+#include <unistd.h>
+
+int main() {
+    int n, i;
+    
+    printf("Enter the value of n: ");
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++) {
+        if (fork() == 0) {
+            printf("Child Process %d, PID: %d, Parent PID: %d\n", i+1, getpid(), getppid());
+        } else {
+            break;
+        }
+    }
+
+    return 0;
+}
+------------------------------------------------------------------------------------
+
+
+unit 6
+ Exercise 1: Concatenating Multiple Strings
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+
+#define MAX_STR_LEN 100
+
+void *concat_strings(void *args) {
+    char *result = (char *)malloc(MAX_STR_LEN * sizeof(char));
+    result[0] = '\0';
+
+    char **strings = (char **)args;
+
+    for (int i = 0; strings[i] != NULL; i++) {
+        strcat(result, strings[i]);
+    }
+
+    printf("Concatenated String: %s\n", result);
+
+    free(result);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t tid;
+    char *strings[] = {"Hello, ", "world!", NULL};
+
+    pthread_create(&tid, NULL, concat_strings, (void *)strings);
+    pthread_join(tid, NULL);
+
+    return 0;
+}
+-----------------------------------------------------------------------
+
+Exercise 2: Finding Length of Strings
+
+#include <stdio.h>
+#include <pthread.h>
+#include <string.h>
+
+void *string_length(void *arg) {
+    char *str = (char *)arg;
+    int length = strlen(str);
+
+    printf("Length of string '%s' is %d\n", str, length);
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t tid;
+    char *str = "Hello, world!";
+
+    pthread_create(&tid, NULL, string_length, (void *)str);
+    pthread_join(tid, NULL);
+
+    return 0;
+}
+---------------------------------------------------------------------------------------
+
+
+
+Exercise 3: Statistical Operations with Threads
+
+#include <stdio.h>
+#include <pthread.h>
+
+#define NUM_THREADS 3
+#define ARRAY_SIZE 10
+
+int array[ARRAY_SIZE] = {5, 8, 3, 9, 1, 7, 2, 6, 4, 10};
+
+int min, max, sum;
+
+void *calculate_minimum(void *arg) {
+    min = array[0];
+    for (int i = 1; i < ARRAY_SIZE; i++) {
+        if (array[i] < min) {
+            min = array[i];
+        }
+    }
+    pthread_exit(NULL);
+}
+
+void *calculate_maximum(void *arg) {
+    max = array[0];
+    for (int i = 1; i < ARRAY_SIZE; i++) {
+        if (array[i] > max) {
+            max = array[i];
+        }
+    }
+    pthread_exit(NULL);
+}
+
+void *calculate_average(void *arg) {
+    sum = 0;
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        sum += array[i];
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+
+    pthread_create(&threads[0], NULL, calculate_minimum, NULL);
+    pthread_create(&threads[1], NULL, calculate_maximum, NULL);
+    pthread_create(&threads[2], NULL, calculate_average, NULL);
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    printf("Minimum: %d\n", min);
+    printf("Maximum: %d\n", max);
+    printf("Average: %.2f\n", (float)sum / ARRAY_SIZE);
+
+    return 0;
+}
+-----------------------------------------------------------------------------------
+
+Exercise 4: Multi-threaded Merge Sort
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define ARRAY_SIZE 10
+
+int array[ARRAY_SIZE] = {5, 8, 3, 9, 1, 7, 2, 6, 4, 10};
+int sorted_array[ARRAY_SIZE];
+
+void *merge_sort(void *arg) {
+    int *arr = (int *)arg;
+    int mid = ARRAY_SIZE / 2;
+    int i = 0, j = mid, k = 0;
+
+    while (i < mid && j < ARRAY_SIZE) {
+        if (arr[i] <= arr[j]) {
+            sorted_array[k++] = arr[i++];
+        } else {
+            sorted_array[k++] = arr[j++];
+        }
+    }
+    while (i < mid) {
+        sorted_array[k++] = arr[i++];
+    }
+    while (j < ARRAY_SIZE) {
+        sorted_array[k++] = arr[j++];
+    }
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t tid;
+    pthread_create(&tid, NULL, merge_sort, (void *)array);
+    pthread_join(tid, NULL);
+
+    printf("Sorted Array: ");
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        printf("%d ", sorted_array[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
+------------------------------------------------------------------------------
+Exercise 5: Displaying Unique Thread IDs
+
+#include <stdio.h>
+#include <pthread.h>
+
+#define NUM_THREADS 5
+
+void *print_thread_id(void *arg) {
+    long tid = (long)arg;
+    printf("Thread ID: %ld\n", tid);
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t threads[NUM_THREADS];
+
+    for (long i = 0; i < NUM_THREADS; i++) {
+        pthread_create(&threads[i], NULL, print_thread_id, (void *)i);
+    }
+
+    for (int i = 0; i < NUM_THREADS; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    return 0;
+}
+--------------------------------------------------------------------------------
+
+Exercise 6: Graceful Thread Termination
+
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+void *worker_thread(void *arg) {
+    while (1) {
+        printf("Working...\n");
+        sleep(1); // Simulate some work
+    }
+}
+
+int main() {
+    pthread_t tid;
+    pthread_create(&tid, NULL, worker_thread, NULL);
+
+    // Sleep for a while to allow the thread to do some work
+    sleep(5);
+
+    printf("Exiting main thread...\n");
+    pthread_cancel(tid); // Request thread cancellation
+    pthread_join(tid, NULL); // Wait for thread termination
+
+    printf("Main thread exited successfully.\n");
+
+    return 0;
+}
+
+----------------------------------------------------------------------------------
+unit -7
+
+Exercise 1: Producer-Consumer Problem
+
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 5
+
+int buffer[BUFFER_SIZE];
+int count = 0;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void *producer(void *arg) {
+    int item = 1;
+    while (1) {
+        pthread_mutex_lock(&mutex);
+        if (count == BUFFER_SIZE) {
+            printf("Buffer is full, producer is waiting...\n");
+            pthread_mutex_unlock(&mutex);
+            sleep(1);
+        } else {
+            printf("Producer produced item %d\n", item);
+            buffer[count++] = item++;
+            pthread_mutex_unlock(&mutex);
+            sleep(1);
+        }
+    }
+    pthread_exit(NULL);
+}
+
+void *consumer(void *arg) {
+    while (1) {
+        pthread_mutex_lock(&mutex);
+        if (count == 0) {
+            printf("Buffer is empty, consumer is waiting...\n");
+            pthread_mutex_unlock(&mutex);
+            sleep(1);
+        } else {
+            printf("Consumer consumed item %d\n", buffer[--count]);
+            pthread_mutex_unlock(&mutex);
+            sleep(1);
+        }
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t producer_thread, consumer_thread;
+    pthread_create(&producer_thread, NULL, producer, NULL);
+    pthread_create(&consumer_thread, NULL, consumer, NULL);
+
+    pthread_join(producer_thread, NULL);
+    pthread_join(consumer_thread, NULL);
+
+    return 0;
+}
+--------------------------------------------------------------------------------
+
+Exercise 2: Reader-Writer Problem
+
+
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+
+#define READERS_COUNT 3
+#define WRITERS_COUNT 2
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+sem_t reader_sem, writer_sem;
+
+int shared_variable = 0;
+int readers_active = 0;
+
+void *reader(void *arg) {
+    while (1) {
+        pthread_mutex_lock(&mutex);
+        readers_active++;
+        if (readers_active == 1) {
+            sem_wait(&writer_sem);
+        }
+        pthread_mutex_unlock(&mutex);
+
+        printf("Reader reads shared variable: %d\n", shared_variable);
+
+        pthread_mutex_lock(&mutex);
+        readers_active--;
+        if (readers_active == 0) {
+            sem_post(&writer_sem);
+        }
+        pthread_mutex_unlock(&mutex);
+
+        sleep(1);
+    }
+    pthread_exit(NULL);
+}
+
+void *writer(void *arg) {
+    while (1) {
+        sem_wait(&writer_sem);
+        shared_variable++;
+        printf("Writer writes to shared variable: %d\n", shared_variable);
+        sem_post(&writer_sem);
+        sleep(1);
+    }
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t readers[READERS_COUNT], writers[WRITERS_COUNT];
+
+    sem_init(&reader_sem, 0, 1);
+    sem_init(&writer_sem, 0, 1);
+
+    for (int i = 0; i < READERS_COUNT; i++) {
+        pthread_create(&readers[i], NULL, reader, NULL);
+    }
+    for (int i = 0; i < WRITERS_COUNT; i++) {
+        pthread_create(&writers[i], NULL, writer, NULL);
+    }
+
+    for (int i = 0; i < READERS_COUNT; i++) {
+        pthread_join(readers[i], NULL);
+    }
+    for (int i = 0; i < WRITERS_COUNT; i++) {
+        pthread_join(writers[i], NULL);
+    }
+
+    sem_destroy(&reader_sem);
+    sem_destroy(&writer_sem);
+
+    return 0;
+}
+----------------------------------------------------------------------------------
+
+
+Exercise 1: Develop a program that demonstrates Communication (IPC) using
+named pipes.
+Tasks:
+• Create a pair of named pipes: one for sending data and uluther for receiving
+data.
+• Develop sender program that writes message to the sending pipe-
+• Create a receiver program that reads from the receiving pipe and displays the
+received message.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <string.h>
+
+Sender Program:
+
+
+#define SEND_PIPE_NAME "/tmp/send_pipe"
+#define MAX_BUF 1024
+
+int main() {
+    int send_fd;
+    char *message = "Hello, receiver!";
+
+    // Create the send pipe
+    mkfifo(SEND_PIPE_NAME, 0666);
+
+    // Open the send pipe for writing
+    send_fd = open(SEND_PIPE_NAME, O_WRONLY);
+
+    // Write message to the send pipe
+    write(send_fd, message, strlen(message) + 1);
+    close(send_fd);
+
+    printf("Message sent successfully.\n");
+
+    return 0;
+}
+
+Receiver Program:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#define RECEIVE_PIPE_NAME "/tmp/receive_pipe"
+#define MAX_BUF 1024
+
+int main() {
+    int receive_fd;
+    char buf[MAX_BUF];
+
+    // Create the receive pipe
+    mkfifo(RECEIVE_PIPE_NAME, 0666);
+
+    // Open the receive pipe for reading
+    receive_fd = open(RECEIVE_PIPE_NAME, O_RDONLY);
+
+    // Read from the receive pipe
+    read(receive_fd, buf, MAX_BUF);
+
+    printf("Received message: %s\n", buf);
+
+    close(receive_fd);
+
+    // Remove the receive pipe
+    unlink(RECEIVE_PIPE_NAME);
+
+    return 0;
+}
+----------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
